@@ -1,7 +1,20 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { api } from "./Api";
 
 const App = () => {
+  useEffect(() => {
+    const exchangeRateLoader = async () => {
+      try {
+        const data = await api.get("");
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    exchangeRateLoader();
+  }, []);
+
   return (
     <ExChangeRateCalculator>
       <h3>환율 계산기</h3>
