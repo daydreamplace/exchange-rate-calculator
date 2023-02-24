@@ -2,20 +2,27 @@ import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { api } from "../api";
 import { currency } from "../constants";
+// import { exchangeRateLoader } from "../hooks";
 
 const Main = () => {
-  // const [currency, setCurrency] = useState("");
-  // const [standardRate, setStandardRate] = useState();
-  const [rates, setRates] = useState();
+  const [currencyRates, setCurrencyRates] = useState();
   const [date, setDate] = useState("");
 
   useEffect(() => {
     const exchangeRateLoader = async () => {
       try {
         const { data } = await api.get("");
-        console.log(data);
-        setRates(data.rates);
+        console.log(data.rates);
         setDate(data.date);
+        const currencyObj = data.rates;
+        const currencyArr = Object.entries(currencyObj ?? {}).map(
+          ([key, value]) => ({
+            currency: key,
+            rate: value,
+          })
+        );
+        setCurrencyRates(currencyArr);
+        console.log(currencyArr);
       } catch (error) {
         console.log(error);
       }
@@ -24,38 +31,46 @@ const Main = () => {
   }, []);
 
   return (
-    <ExChangeRateCalculator>
-      <h3>환율 계산기</h3>
-      <h5>{date}</h5>
-      <form>
-        <div className="calculator-wrapper">
-          <input
-            className="amount"
-            name="number"
-            placeholder="금액을 입력하세요"
-          />
-          <div className="line" />
-          <select className="select-box" name="national">
-            <option value="none">=== 선택 ===</option>
-            <option value="cad">캐나다 달러</option>
-            <option value="krw">대한민국 원</option>
-            <option value="usd">미국 달러</option>
-            <option value="eur">유럽 유로</option>
-          </select>
-        </div>
-        <div className="calculator-wrapper">
-          <div className="exchange"></div>
-          <div className="line" />
-          <select className="select-box" name="national">
-            <option value="none">=== 선택 ===</option>
-            <option value="cad">캐나다 달러</option>
-            <option value="krw">대한민국 원</option>
-            <option value="usd">미국 달러</option>
-            <option value="eur">유럽 유로</option>
-          </select>
-        </div>
-      </form>
-    </ExChangeRateCalculator>
+    currencyRates && (
+      <ExChangeRateCalculator>
+        <h3>환율 계산기</h3>
+        <h5>{date}</h5>
+        <form>
+          <div className="calculator-wrapper">
+            <input
+              className="amount"
+              name="amount"
+              placeholder="금액을 입력하세요"
+            />
+            <div className="line" />
+            <select className="select-box" name="national">
+              <option value="none">=== 선택 ===</option>
+              {currencyRates.map((rates) => {
+                return (
+                  <option key={rates.currency} value={rates.currency}>
+                    {rates.currency}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <div className="calculator-wrapper">
+            <div className="exchange"></div>
+            <div className="line" />
+            <select className="select-box" name="national">
+              <option value="none">=== 선택 ===</option>
+              {currencyRates.map((rates) => {
+                return (
+                  <option key={rates.currency} value={rates.currency}>
+                    {rates.currency}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </form>
+      </ExChangeRateCalculator>
+    )
   );
 };
 
