@@ -8,6 +8,7 @@ const Main = () => {
   const [amount, setAmount] = useState(0);
   const [fromCurrency, setFromCurrency] = useState();
   const [toCurrency, setToCurrency] = useState();
+  const [convertAmount, setConvertAmount] = useState(0);
 
   useEffect(() => {
     const exchangeRateLoader = async () => {
@@ -29,12 +30,28 @@ const Main = () => {
     exchangeRateLoader();
   }, []);
 
-  const convertCurrency = (amount, fromCurrency, toCurrency) => {
-    const exchangeRate = exchangeRates;
-
-    const rate = exchangeRate[fromCurrency][toCurrency];
+  const convertCurrency = (amount, fromCurrency, toCurrency, exchangeRates) => {
+    const exchangeRate = {};
+    for (let i = 0; i < exchangeRates.length; i++) {
+      const currency = exchangeRates[i].currency;
+      const rate = exchangeRates[i].rate;
+      exchangeRate[currency] = rate;
+    }
+    if (fromCurrency === "JPY") {
+      amount /= 100;
+    }
+    const rate = exchangeRate[fromCurrency] / exchangeRate[toCurrency];
     const convertedAmount = amount * rate;
-    return convertedAmount;
+    if (toCurrency === "JPY") {
+      convertedAmount *= 100;
+    }
+    setConvertAmount(convertedAmount);
+  };
+
+  const handleAmount = (e) => {
+    const amount = e.target.value;
+    setAmount(amount);
+    console.log(amount);
   };
 
   return (
@@ -48,7 +65,7 @@ const Main = () => {
               className="amount"
               name="amount"
               placeholder="금액을 입력하세요"
-              onChange={() => {}}
+              onChange={handleAmount}
             />
             <div className="line" />
             <select className="select-box" name="national" onChange={() => {}}>
@@ -63,7 +80,7 @@ const Main = () => {
             </select>
           </div>
           <div className="calculator-wrapper">
-            <div className="exchange"></div>
+            <div className="exchange">{convertAmount}</div>
             <div className="line" />
             <select className="select-box" name="national" onChange={() => {}}>
               <option value="none">=== 선택 ===</option>
