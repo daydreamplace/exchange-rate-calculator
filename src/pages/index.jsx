@@ -5,14 +5,14 @@ import { currency } from "../constants";
 // import { exchangeRateLoader } from "../hooks";
 
 const Main = () => {
-  const [currencyRates, setCurrencyRates] = useState();
   const [date, setDate] = useState("");
+  const [amount, setAmount] = useState();
+  const [currencyRates, setCurrencyRates] = useState();
 
   useEffect(() => {
     const exchangeRateLoader = async () => {
       try {
         const { data } = await api.get("");
-        console.log(data.rates);
         setDate(data.date);
         const currencyObj = data.rates;
         const currencyArr = Object.entries(currencyObj ?? {}).map(
@@ -30,6 +30,16 @@ const Main = () => {
     exchangeRateLoader();
   }, []);
 
+  const handleAmount = (e) => {
+    let { value } = e.target;
+    let numValue = value.trim();
+    if (!/^[0-9]*$/.test(numValue)) {
+      e.target.value = "";
+      return;
+    }
+    setAmount(numValue);
+  };
+
   return (
     currencyRates && (
       <ExChangeRateCalculator>
@@ -41,6 +51,7 @@ const Main = () => {
               className="amount"
               name="amount"
               placeholder="금액을 입력하세요"
+              onChange={handleAmount}
             />
             <div className="line" />
             <select className="select-box" name="national">
@@ -53,6 +64,9 @@ const Main = () => {
                 );
               })}
             </select>
+          </div>
+          <div>
+            <h2>=</h2>
           </div>
           <div className="calculator-wrapper">
             <div className="exchange"></div>
@@ -75,6 +89,8 @@ const Main = () => {
 };
 
 const ExChangeRateCalculator = styled.div`
+  width: 500px;
+
   .calculator-wrapper {
     display: flex;
     flex-direction: row;
