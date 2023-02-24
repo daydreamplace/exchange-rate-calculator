@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { api } from "../api";
-import { currency } from "../constants";
-// import { exchangeRateLoader } from "../hooks";
 
 const Main = () => {
   const [date, setDate] = useState("");
-  const [amount, setAmount] = useState();
-  const [currencyRates, setCurrencyRates] = useState();
+  const [exchangeRates, setExchangeRates] = useState([]);
 
   useEffect(() => {
     const exchangeRateLoader = async () => {
@@ -21,8 +18,7 @@ const Main = () => {
             rate: value,
           })
         );
-        setCurrencyRates(currencyArr);
-        console.log(currencyArr);
+        setExchangeRates(currencyArr);
       } catch (error) {
         console.log(error);
       }
@@ -30,18 +26,8 @@ const Main = () => {
     exchangeRateLoader();
   }, []);
 
-  const handleAmount = (e) => {
-    let { value } = e.target;
-    let numValue = value.trim();
-    if (!/^[0-9]*$/.test(numValue)) {
-      e.target.value = "";
-      return;
-    }
-    setAmount(numValue);
-  };
-
   return (
-    currencyRates && (
+    exchangeRates && (
       <ExChangeRateCalculator>
         <h3>환율 계산기</h3>
         <h5>{date}</h5>
@@ -51,12 +37,12 @@ const Main = () => {
               className="amount"
               name="amount"
               placeholder="금액을 입력하세요"
-              onChange={handleAmount}
+              onChange={() => {}}
             />
             <div className="line" />
-            <select className="select-box" name="national">
+            <select className="select-box" name="national" onChange={() => {}}>
               <option value="none">=== 선택 ===</option>
-              {currencyRates.map((rates) => {
+              {exchangeRates.map((rates) => {
                 return (
                   <option key={rates.currency} value={rates.currency}>
                     {rates.currency}
@@ -65,15 +51,12 @@ const Main = () => {
               })}
             </select>
           </div>
-          <div>
-            <h2>=</h2>
-          </div>
           <div className="calculator-wrapper">
             <div className="exchange"></div>
             <div className="line" />
-            <select className="select-box" name="national">
+            <select className="select-box" name="national" onChange={() => {}}>
               <option value="none">=== 선택 ===</option>
-              {currencyRates.map((rates) => {
+              {exchangeRates.map((rates) => {
                 return (
                   <option key={rates.currency} value={rates.currency}>
                     {rates.currency}
