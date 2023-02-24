@@ -5,6 +5,9 @@ import { api } from "../api";
 const Main = () => {
   const [date, setDate] = useState("");
   const [exchangeRates, setExchangeRates] = useState([]);
+  const [amount, setAmount] = useState(0);
+  const [fromCurrency, setFromCurrency] = useState();
+  const [toCurrency, setToCurrency] = useState();
 
   useEffect(() => {
     const exchangeRateLoader = async () => {
@@ -25,6 +28,14 @@ const Main = () => {
     };
     exchangeRateLoader();
   }, []);
+
+  const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    const exchangeRate = exchangeRates;
+
+    const rate = exchangeRate[fromCurrency][toCurrency];
+    const convertedAmount = amount * rate;
+    return convertedAmount;
+  };
 
   return (
     exchangeRates && (
