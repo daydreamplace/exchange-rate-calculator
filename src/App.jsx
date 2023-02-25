@@ -1,7 +1,8 @@
 import React from "react";
+import Main from "./pages";
 
 const App = () => {
-  return <div>exchange-rate-calculator</div>;
+  return <Main />;
 };
 
 export default App;
