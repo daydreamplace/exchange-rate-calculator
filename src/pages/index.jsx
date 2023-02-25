@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from "../api";
 import styled from "styled-components";
 import { currency } from "../constants";
 
@@ -23,11 +23,10 @@ const Main = () => {
   useEffect(() => {
     const exchangeRateLoader = async () => {
       try {
-        const { data } = await axios.get(
-          `https://api.exchangerate.host/latest?base=${fromCurrency}&symbols=${toCurrency}`
+        const { data } = await api.get(
+          `latest?base=${fromCurrency}&symbols=${toCurrency}`
         );
         setDate(data.date);
-        console.log(data.rates[toCurrency]);
         setExchangeRate(data.rates[toCurrency]);
       } catch (error) {
         console.log(error);
@@ -68,7 +67,7 @@ const Main = () => {
             type="number"
             className="amount"
             name="amount"
-            value={fromAmount}
+            value={fromAmount || ""}
             placeholder="입력하세요"
             onChange={handleFromAmount}
           />
@@ -90,7 +89,7 @@ const Main = () => {
           <input
             type="number"
             className="amount"
-            value={toAmount}
+            value={toAmount || ""}
             onChange={handleToAmount}
           />
           <div className="line" />
