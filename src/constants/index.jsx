@@ -1,4 +1,5 @@
 export const currency = [
+  { currency: "KRW", name: "대한민국 KRW" },
   { currency: "USD", name: "미국 USD" },
   { currency: "JPY", name: "일본 JPY 100" },
   { currency: "EUR", name: "유럽연합 EUR" },

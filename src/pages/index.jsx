@@ -1,19 +1,18 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import styled from "styled-components";
-import { api } from "../api";
 import { currency } from "../constants";
 
 const Main = () => {
   const [date, setDate] = useState("");
-  const [exchangeRates, setExchangeRates] = useState([]);
   const [exchangeRate, setExchangeRate] = useState();
-  const [fromCurrency, setFromCurrency] = useState(null);
-  const [toCurrency, setToCurrency] = useState(null);
+  const [fromCurrency, setFromCurrency] = useState("");
+  const [toCurrency, setToCurrency] = useState("");
   const [amount, setAmount] = useState(null);
-  const [convertAmount, setConvertAmount] = useState(null);
+  const [amountInFromCurrency, setAmountInFromCurrency] = useState(true);
 
   let toAmount, fromAmount;
-  if (fromCurrency) {
+  if (amountInFromCurrency) {
     fromAmount = amount;
     toAmount = amount * exchangeRate;
   } else {
@@ -24,22 +23,18 @@ const Main = () => {
   useEffect(() => {
     const exchangeRateLoader = async () => {
       try {
-        const { data } = await api.get(``);
-        setDate(data.date);
-        const currencyObj = data.rates;
-        const currencyArr = Object.entries(currencyObj ?? {}).map(
-          ([key, value]) => ({
-            currency: key,
-            rate: value,
-          })
+        const { data } = await axios.get(
+          `https://api.exchangerate.host/latest?base=${fromCurrency}&symbols=${toCurrency}`
         );
-        setExchangeRates(currencyArr);
+        setDate(data.date);
+        console.log(data.rates[toCurrency]);
+        setExchangeRate(data.rates[toCurrency]);
       } catch (error) {
         console.log(error);
       }
     };
     exchangeRateLoader();
-  }, []);
+  }, [fromCurrency, toCurrency]);
 
   const handleFromCurrency = (e) => {
     const fromCurrency = e.target.value;
@@ -51,102 +46,69 @@ const Main = () => {
     setToCurrency(toCurrency);
   };
 
-  useEffect(() => {
-    const convertCurrency = (
-      amount,
-      fromCurrency,
-      toCurrency,
-      exchangeRates
-    ) => {
-      if (fromCurrency == null || toCurrency == null) {
-        setConvertAmount(null);
-        return;
-      }
-      const exchangeRate = {};
-      for (let i = 0; i < exchangeRates.length; i++) {
-        const currency = exchangeRates[i].currency;
-        const rate = exchangeRates[i].rate;
-        exchangeRate[currency] = rate;
-      }
-      let convertedAmount;
-      // if (fromCurrency === "JPY") {
-      //   amount /= 100;
-      // }
-      // if (fromCurrency === toCurrency) {
-      //   convertedAmount = amount;
-      // } else {
-      //   const fromRate = exchangeRate[fromCurrency];
-      //   const toRate = exchangeRate[toCurrency];
-      //   const exchangeRateInJPY = exchangeRate["JPY"];
-      //   const amountInJPY = fromCurrency === "JPY" ? amount : amount / fromRate;
-      //   const toAmountInJPY = amountInJPY * (exchangeRateInJPY / toRate);
-      //   convertedAmount =
-      //     toCurrency === "JPY" ? toAmountInJPY * 100 : toAmountInJPY;
-      // }
-      setConvertAmount(convertedAmount);
-    };
-    convertCurrency(amount, fromCurrency, toCurrency, exchangeRates);
-  }, [amount, fromCurrency, toCurrency, exchangeRates]);
-
-  const handleAmount = (e) => {
+  const handleFromAmount = (e) => {
     const amount = e.target.value;
-    setAmount(parseFloat(amount));
+    setAmount(amount);
+    setAmountInFromCurrency(true);
+  };
+
+  const handleToAmount = (e) => {
+    const amount = e.target.value;
+    setAmount(amount);
+    setAmountInFromCurrency(false);
   };
 
   return (
-    exchangeRates && (
-      <ExChangeRateCalculator>
-        <h3>환율 계산기</h3>
-        <h5>{date}</h5>
-        <form>
-          <div className="calculator-wrapper">
-            <input
-              type="number"
-              className="amount"
-              name="amount"
-              placeholder="입력하세요"
-              onChange={handleAmount}
-            />
-            <div className="line" />
-            <select
-              className="select-box"
-              name="national"
-              onChange={handleFromCurrency}
-            >
-              <option value="none">=== 선택 ===</option>
-              {/* {exchangeRates.map((rates) => {
-                return (
-                  <option key={rates.currency} value={rates.currency}>
-                    {rates.currency}
-                  </option>
-                );
-              })} */}
-              {currency.map(() => {})}
-            </select>
-          </div>
-          <div className="calculator-wrapper">
-            <div className="exchange">
-              {convertAmount != null ? `${convertAmount.toFixed(2)}` : ""}
-            </div>
-            <div className="line" />
-            <select
-              className="select-box"
-              name="national"
-              onChange={handleToCurrency}
-            >
-              <option value="none">=== 선택 ===</option>
-              {/* {exchangeRates.map((rates) => {
-                return (
-                  <option key={rates.currency} value={rates.currency}>
-                    {rates.currency}
-                  </option>
-                );
-              })} */}
-            </select>
-          </div>
-        </form>
-      </ExChangeRateCalculator>
-    )
+    <ExChangeRateCalculator>
+      <h3>환율 계산기</h3>
+      <h5>{date}</h5>
+      <form>
+        <div className="calculator-wrapper">
+          <input
+            type="number"
+            className="amount"
+            name="amount"
+            value={fromAmount}
+            placeholder="입력하세요"
+            onChange={handleFromAmount}
+          />
+          <div className="line" />
+          <select
+            className="select-box"
+            name="national"
+            onChange={handleFromCurrency}
+          >
+            <option value="none">=== 선택 ===</option>
+            {currency.map((option) => (
+              <option key={option.currency} value={option.currency}>
+                {option.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="calculator-wrapper">
+          <input
+            type="number"
+            className="amount"
+            value={toAmount}
+            onChange={handleToAmount}
+          />
+          <div className="line" />
+          <select
+            className="select-box"
+            name="national"
+            onChange={handleToCurrency}
+          >
+            <option value="none">=== 선택 ===</option>
+            {currency.map((option) => (
+              <option key={option.currency} value={option.currency}>
+                {option.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </form>
+    </ExChangeRateCalculator>
   );
 };
 

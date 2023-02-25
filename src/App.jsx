@@ -42,7 +42,7 @@ const App = () => {
 
   return (
     <>
-      <div>
+      {/* <div>
         <h1>환율 계산기</h1>
         <input
           type="number"
@@ -71,7 +71,7 @@ const App = () => {
           <option value="JPY">JPY</option>
           <option value="KRW">1</option>
         </select>
-      </div>
+      </div> */}
       <Main />
     </>
   );
