@@ -5,10 +5,9 @@ import { api } from "../api";
 const Main = () => {
   const [date, setDate] = useState("");
   const [exchangeRates, setExchangeRates] = useState([]);
-  const [amount, setAmount] = useState(0);
-  const [fromCurrency, setFromCurrency] = useState();
-  const [toCurrency, setToCurrency] = useState();
-  const [convertAmount, setConvertAmount] = useState(0);
+  const [fromCurrency, setFromCurrency] = useState(null);
+  const [toCurrency, setToCurrency] = useState(null);
+  const [convertAmount, setConvertAmount] = useState(null);
 
   useEffect(() => {
     const exchangeRateLoader = async () => {
@@ -30,7 +29,29 @@ const Main = () => {
     exchangeRateLoader();
   }, []);
 
+  const handleFromCurrency = (e) => {
+    const fromCurrency = e.target.value;
+    const findExchangeRate = exchangeRates.find(
+      (item) => item.currency === fromCurrency
+    );
+    setFromCurrency(parseFloat(findExchangeRate.rate));
+    console.log(fromCurrency);
+  };
+
+  const handleToCurrency = (e) => {
+    const toCurrency = e.target.value;
+    const findExchangeRate = exchangeRates?.find(
+      (item) => item.currency === toCurrency
+    );
+    setToCurrency(parseFloat(findExchangeRate.rate));
+    console.log(toCurrency);
+  };
+
   const convertCurrency = (amount, fromCurrency, toCurrency, exchangeRates) => {
+    if (fromCurrency == null || toCurrency == null) {
+      return;
+    }
+
     const exchangeRate = {};
     for (let i = 0; i < exchangeRates.length; i++) {
       const currency = exchangeRates[i].currency;
@@ -50,8 +71,8 @@ const Main = () => {
 
   const handleAmount = (e) => {
     const amount = e.target.value;
-    setAmount(amount);
     console.log(amount);
+    convertCurrency(amount, fromCurrency, toCurrency, exchangeRates);
   };
 
   return (
@@ -68,7 +89,11 @@ const Main = () => {
               onChange={handleAmount}
             />
             <div className="line" />
-            <select className="select-box" name="national" onChange={() => {}}>
+            <select
+              className="select-box"
+              name="national"
+              onChange={handleFromCurrency}
+            >
               <option value="none">=== 선택 ===</option>
               {exchangeRates.map((rates) => {
                 return (
@@ -80,9 +105,17 @@ const Main = () => {
             </select>
           </div>
           <div className="calculator-wrapper">
-            <div className="exchange">{convertAmount}</div>
+            <div className="exchange">
+              {convertAmount != null
+                ? `${convertAmount.toFixed(2)} ${toCurrency}`
+                : ""}
+            </div>
             <div className="line" />
-            <select className="select-box" name="national" onChange={() => {}}>
+            <select
+              className="select-box"
+              name="national"
+              onChange={handleToCurrency}
+            >
               <option value="none">=== 선택 ===</option>
               {exchangeRates.map((rates) => {
                 return (
