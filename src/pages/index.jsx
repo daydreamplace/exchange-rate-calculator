@@ -1,18 +1,30 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { api } from "../api";
+import { currency } from "../constants";
 
 const Main = () => {
   const [date, setDate] = useState("");
   const [exchangeRates, setExchangeRates] = useState([]);
+  const [exchangeRate, setExchangeRate] = useState();
   const [fromCurrency, setFromCurrency] = useState(null);
   const [toCurrency, setToCurrency] = useState(null);
+  const [amount, setAmount] = useState(null);
   const [convertAmount, setConvertAmount] = useState(null);
+
+  let toAmount, fromAmount;
+  if (fromCurrency) {
+    fromAmount = amount;
+    toAmount = amount * exchangeRate;
+  } else {
+    toAmount = amount;
+    fromAmount = amount / exchangeRate;
+  }
 
   useEffect(() => {
     const exchangeRateLoader = async () => {
       try {
-        const { data } = await api.get("");
+        const { data } = await api.get(``);
         setDate(data.date);
         const currencyObj = data.rates;
         const currencyArr = Object.entries(currencyObj ?? {}).map(
@@ -31,48 +43,54 @@ const Main = () => {
 
   const handleFromCurrency = (e) => {
     const fromCurrency = e.target.value;
-    const findExchangeRate = exchangeRates.find(
-      (item) => item.currency === fromCurrency
-    );
-    setFromCurrency(parseFloat(findExchangeRate.rate));
-    console.log(fromCurrency);
+    setFromCurrency(fromCurrency);
   };
 
   const handleToCurrency = (e) => {
     const toCurrency = e.target.value;
-    const findExchangeRate = exchangeRates?.find(
-      (item) => item.currency === toCurrency
-    );
-    setToCurrency(parseFloat(findExchangeRate.rate));
-    console.log(toCurrency);
+    setToCurrency(toCurrency);
   };
 
-  const convertCurrency = (amount, fromCurrency, toCurrency, exchangeRates) => {
-    if (fromCurrency == null || toCurrency == null) {
-      return;
-    }
-
-    const exchangeRate = {};
-    for (let i = 0; i < exchangeRates.length; i++) {
-      const currency = exchangeRates[i].currency;
-      const rate = exchangeRates[i].rate;
-      exchangeRate[currency] = rate;
-    }
-    if (fromCurrency === "JPY") {
-      amount /= 100;
-    }
-    const rate = exchangeRate[fromCurrency] / exchangeRate[toCurrency];
-    const convertedAmount = amount * rate;
-    if (toCurrency === "JPY") {
-      convertedAmount *= 100;
-    }
-    setConvertAmount(convertedAmount);
-  };
+  useEffect(() => {
+    const convertCurrency = (
+      amount,
+      fromCurrency,
+      toCurrency,
+      exchangeRates
+    ) => {
+      if (fromCurrency == null || toCurrency == null) {
+        setConvertAmount(null);
+        return;
+      }
+      const exchangeRate = {};
+      for (let i = 0; i < exchangeRates.length; i++) {
+        const currency = exchangeRates[i].currency;
+        const rate = exchangeRates[i].rate;
+        exchangeRate[currency] = rate;
+      }
+      let convertedAmount;
+      // if (fromCurrency === "JPY") {
+      //   amount /= 100;
+      // }
+      // if (fromCurrency === toCurrency) {
+      //   convertedAmount = amount;
+      // } else {
+      //   const fromRate = exchangeRate[fromCurrency];
+      //   const toRate = exchangeRate[toCurrency];
+      //   const exchangeRateInJPY = exchangeRate["JPY"];
+      //   const amountInJPY = fromCurrency === "JPY" ? amount : amount / fromRate;
+      //   const toAmountInJPY = amountInJPY * (exchangeRateInJPY / toRate);
+      //   convertedAmount =
+      //     toCurrency === "JPY" ? toAmountInJPY * 100 : toAmountInJPY;
+      // }
+      setConvertAmount(convertedAmount);
+    };
+    convertCurrency(amount, fromCurrency, toCurrency, exchangeRates);
+  }, [amount, fromCurrency, toCurrency, exchangeRates]);
 
   const handleAmount = (e) => {
     const amount = e.target.value;
-    console.log(amount);
-    convertCurrency(amount, fromCurrency, toCurrency, exchangeRates);
+    setAmount(parseFloat(amount));
   };
 
   return (
@@ -83,9 +101,10 @@ const Main = () => {
         <form>
           <div className="calculator-wrapper">
             <input
+              type="number"
               className="amount"
               name="amount"
-              placeholder="금액을 입력하세요"
+              placeholder="입력하세요"
               onChange={handleAmount}
             />
             <div className="line" />
@@ -95,20 +114,19 @@ const Main = () => {
               onChange={handleFromCurrency}
             >
               <option value="none">=== 선택 ===</option>
-              {exchangeRates.map((rates) => {
+              {/* {exchangeRates.map((rates) => {
                 return (
                   <option key={rates.currency} value={rates.currency}>
                     {rates.currency}
                   </option>
                 );
-              })}
+              })} */}
+              {currency.map(() => {})}
             </select>
           </div>
           <div className="calculator-wrapper">
             <div className="exchange">
-              {convertAmount != null
-                ? `${convertAmount.toFixed(2)} ${toCurrency}`
-                : ""}
+              {convertAmount != null ? `${convertAmount.toFixed(2)}` : ""}
             </div>
             <div className="line" />
             <select
@@ -117,13 +135,13 @@ const Main = () => {
               onChange={handleToCurrency}
             >
               <option value="none">=== 선택 ===</option>
-              {exchangeRates.map((rates) => {
+              {/* {exchangeRates.map((rates) => {
                 return (
                   <option key={rates.currency} value={rates.currency}>
                     {rates.currency}
                   </option>
                 );
-              })}
+              })} */}
             </select>
           </div>
         </form>
