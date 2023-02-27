@@ -25,6 +25,9 @@ git clone https://github.com/daydreamplace/exchange-rate-calculator.git
 <br />
 
 2.  Navigate to a folder and download the package.
+```
+cd exchange-rate-calculator
+```
 
 ```
 npm i
@@ -76,6 +79,7 @@ src
 - React.js
 - axios
 - styled-components
+- Vite
 
 
 <br /><br />
