@@ -4,7 +4,7 @@ As part of the recruitment project, the project created exchange rate calculator
 
 <br/><br/>
 
-## 🗓 Development period
+## 🗓 Development Period
 
 <br />
 02/23/2023 ~ 02/25/2023 (3days)
